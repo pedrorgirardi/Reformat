@@ -28,10 +28,12 @@ class PgReformatCommand(sublime_plugin.TextCommand):
         for region in self.view.sel():
             region = sublime.Region(0, self.view.size()) if region.empty() else region
 
-            if syntax.scope == 'source.clojure':
+            if syntax.scope == "source.clojure":
                 self.format_clojure(edit, region)
-            elif syntax.scope == 'source.json':
+            elif syntax.scope == "source.json":
                 self.format_json(edit, region)
+            elif syntax.scope == "source.python":
+                self.format_python(edit, region)
 
     def format_json(self, edit, region):
         try:
@@ -50,7 +52,7 @@ class PgReformatCommand(sublime_plugin.TextCommand):
             [zprint_path(), zprint_config],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
         )
 
         try:
@@ -66,5 +68,26 @@ class PgReformatCommand(sublime_plugin.TextCommand):
 
             process.kill()
 
+    def format_python(self, edit, region):
+        """
+        Please make sure `black` is installed: pip3 install black
+        """
+        process = subprocess.Popen(
+            ["black", "--code", self.view.substr(region).encode()],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
 
+        try:
+            stdout, stderr = process.communicate()
 
+            formatted = stdout.decode("utf-8")
+
+            if formatted:
+                self.view.replace(edit, region, formatted)
+
+        except subprocess.TimeoutExpired as e:
+            print(f"(Reformat) Failed to format Python: {e}")
+
+            process.kill()
