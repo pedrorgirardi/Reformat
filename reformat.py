@@ -38,6 +38,8 @@ class PgReformatCommand(sublime_plugin.TextCommand):
                 self.format_json(edit, region)
             elif syntax.scope == "source.python":
                 self.format_python(edit, region)
+            elif syntax.scope == "source.dart":
+                self.format_dart(edit, region)
 
     def format_json(self, edit, region):
         try:
@@ -95,3 +97,15 @@ class PgReformatCommand(sublime_plugin.TextCommand):
             print(f"(Reformat) Failed to format Python: {e}")
 
             process.kill()
+
+    def format_dart(self, edit, region):
+        """
+        Please make sure Flutter is installed.
+        """
+
+        if file_name := self.view.file_name():
+            args = ["flutter", "format", file_name]
+
+            print(" ".join(args))
+
+            subprocess.run(args)
