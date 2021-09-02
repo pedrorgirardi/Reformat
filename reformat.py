@@ -28,7 +28,11 @@ class PgReformatCommand(sublime_plugin.TextCommand):
         for region in self.view.sel():
             region = sublime.Region(0, self.view.size()) if region.empty() else region
 
-            if syntax.scope == "source.clojure":
+            if syntax.scope in {
+                "source.edn",
+                "source.clojure",
+                "source.clojure.clojurescript",
+            }:
                 self.format_clojure(edit, region)
             elif syntax.scope == "source.json":
                 self.format_json(edit, region)
