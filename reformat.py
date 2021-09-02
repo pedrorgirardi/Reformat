@@ -42,6 +42,10 @@ class PgReformatCommand(sublime_plugin.TextCommand):
                 self.format_dart(edit, region)
 
     def format_json(self, edit, region):
+        """
+        Format JSON with builtin json module.
+        """
+
         try:
             decoded = json.loads(self.view.substr(region))
 
@@ -52,6 +56,10 @@ class PgReformatCommand(sublime_plugin.TextCommand):
             print(f"(Reformat) Failed to format JSON: {e}")
 
     def format_clojure(self, edit, region):
+        """
+        Format Clojure(Script) and EDN with zprint.
+        """
+
         zprint_config = f"{{:style :respect-bl}}"
 
         process = subprocess.Popen(
@@ -76,31 +84,20 @@ class PgReformatCommand(sublime_plugin.TextCommand):
 
     def format_python(self, edit, region):
         """
-        Please make sure `black` is installed: pip3 install black
+        Format Python with black.
         """
-        process = subprocess.Popen(
-            ["black", "--code", self.view.substr(region).encode()],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
 
-        try:
-            stdout, stderr = process.communicate()
+        if file_name := self.view.file_name():
 
-            formatted = stdout.decode("utf-8")
+            args = ["black", self.view.file_name()]
 
-            if formatted:
-                self.view.replace(edit, region, formatted)
+            print(" ".join(args))
 
-        except subprocess.TimeoutExpired as e:
-            print(f"(Reformat) Failed to format Python: {e}")
-
-            process.kill()
+            subprocess.run(args)
 
     def format_dart(self, edit, region):
         """
-        Please make sure Flutter is installed.
+        Format Dart with builtin formatter.
         """
 
         if file_name := self.view.file_name():
