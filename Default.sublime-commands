@@ -1,0 +1,6 @@
+[
+    {
+        "caption": "Reformat",
+        "command": "pg_reformat"
+    }
+]
